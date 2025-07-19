@@ -2,69 +2,72 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Calculadora de Muestra - Dr. Jaime Zambrana Chacón</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 20px; }
-    .container { background: white; max-width: 700px; margin: auto; padding: 30px; border-radius: 10px; box-shadow: 0 0 12px rgba(0,0,0,0.15); }
-    h1, h2 { text-align: center; color: #2e5d9f; }
-    label { display: block; margin-top: 15px; font-weight: bold; }
-    select, input { width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
-    button { margin-top: 20px; width: 100%; padding: 10px; background-color: #2e5d9f; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-    button:hover { background-color: #1e406e; }
-    #formulaInfo, #resultado { margin-top: 20px; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
-    code { background: #eef; padding: 2px 4px; border-radius: 4px; font-weight: bold; }
+    body { background-color: #eef2f3; }
+    .card { margin-top: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .btn-primary { background-color: #2e5d9f; border: none; }
+    .btn-primary:hover { background-color: #1e406e; }
+    code { background: #eef; padding: 4px 8px; border-radius: 5px; display: inline-block; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Calculadora de Tamaño de Muestra</h1>
-    <h2>Dr. Jaime Zambrana Chacón</h2>
+  <div class="container py-4">
+    <div class="card p-4">
+      <h2 class="text-center text-primary">Calculadora de Tamaño de Muestra</h2>
+      <h5 class="text-center text-secondary mb-4">Dr. Jaime Zambrana Chacón</h5>
 
-    <label>Tipo de población:</label>
-    <select id="tipoPoblacion" onchange="mostrarFormula()">
-      <option value="finita">Finita (valor recomendado)</option>
-      <option value="infinita">Infinita</option>
-    </select>
+      <div class="mb-3">
+        <label class="form-label">Tipo de población:</label>
+        <select class="form-select" id="tipoPoblacion" onchange="mostrarFormula()">
+          <option value="finita">Finita (valor recomendado)</option>
+          <option value="infinita">Infinita</option>
+        </select>
+      </div>
 
-    <div id="formulaInfo"></div>
+      <div id="formulaInfo" class="alert alert-info"></div>
 
-    <label>Población total (N, solo para finita):</label>
-    <input type="number" id="population" placeholder="Ej. 1500">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Población total (N):</label>
+          <input type="number" class="form-control" id="population" placeholder="Ej. 1500">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Confianza (Z):</label>
+          <select class="form-select" id="zValue">
+            <option value="1.645">90% (Z = 1.645)</option>
+            <option value="1.96" selected>95% (Z = 1.96)</option>
+            <option value="2.576">99% (Z = 2.576)</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Proporción esperada (p):</label>
+          <select class="form-select" id="pValue">
+            <option value="0.5" selected>0.50</option>
+            <option value="0.8">0.80</option>
+            <option value="0.2">0.20</option>
+            <option value="0.1">0.10</option>
+            <option value="0.9">0.90</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Margen de error (E) en %:</label>
+          <select class="form-select" id="ePercent">
+            ${[...Array(11).keys()].map(v => `<option value="${v}" ${v === 5 ? 'selected' : ''}>${v}%</option>`).join('')}
+          </select>
+        </div>
+      </div>
 
-    <label>Confianza (Z):</label>
-    <select id="zValue">
-      <option value="1.645">Z = 1.645 (90%)</option>
-      <option value="1.96" selected>Z = 1.96 (95%)</option>
-      <option value="2.576">Z = 2.576 (99%)</option>
-    </select>
+      <div class="d-grid mt-3">
+        <button class="btn btn-primary" onclick="calcularMuestra()">Calcular muestra</button>
+      </div>
 
-    <label>Proporción esperada (p):</label>
-    <select id="pValue">
-      <option value="0.5" selected>p = 0.50 (50%)</option>
-      <option value="0.8">p = 0.80 (80%)</option>
-      <option value="0.2">p = 0.20 (20%)</option>
-      <option value="0.1">p = 0.10 (10%)</option>
-      <option value="0.9">p = 0.90 (90%)</option>
-    </select>
-
-    <label>Margen de error (E) en %:</label>
-    <select id="ePercent">
-      <option value="0">0</option>
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5" selected>5</option>
-      <option value="6">6</option>
-      <option value="7">7</option>
-      <option value="8">8</option>
-      <option value="9">9</option>
-      <option value="10">10</option>
-    </select>
-
-    <button onclick="calcularMuestra()">Calcular muestra</button>
-
-    <div id="resultado"></div>
+      <div id="resultado" class="alert alert-success mt-4"></div>
+    </div>
   </div>
 
   <script>
@@ -73,17 +76,11 @@
       const formulaDiv = document.getElementById("formulaInfo");
 
       if (tipo === "finita") {
-        formulaDiv.innerHTML = `
-          <strong>📘 Fórmula para población finita:</strong><br>
-          <code>n = n₀ / (1 + ((n₀ - 1)/N))</code><br>
-          <p><em>Descripción:</em> Se ajusta la muestra básica n₀ para reflejar el efecto de una población limitada (N conocida). Esto evita sobreestimar el tamaño necesario.</p>
-        `;
+        formulaDiv.innerHTML = `\\(n = \\frac{n_0}{1 + \\frac{n_0 - 1}{N}}\\)<br><small>⚙️ Ajuste para poblaciones finitas</small>`;
+        MathJax.typesetPromise();
       } else {
-        formulaDiv.innerHTML = `
-          <strong>📘 Fórmula para población infinita:</strong><br>
-          <code>n₀ = (Z² × p × q) / E²</code><br>
-          <p><em>Descripción:</em> Se estima la muestra sin considerar un límite poblacional. Esta fórmula es ideal cuando N es desconocida o tan grande que no afecta el cálculo.</p>
-        `;
+        formulaDiv.innerHTML = `\\(n_0 = \\frac{Z^2 \\cdot p \\cdot q}{E^2}\\)<br><small>🌍 Aproximación para poblaciones infinitas</small>`;
+        MathJax.typesetPromise();
       }
     }
 
@@ -99,7 +96,7 @@
       const resultado = document.getElementById("resultado");
 
       if (E === 0) {
-        resultado.innerHTML = "<span style='color:red;'>⚠️ El margen de error no puede ser 0%. Seleccione al menos 1%.</span>";
+        resultado.innerHTML = "<strong>⚠️ Margen de error no puede ser 0%</strong>";
         return;
       }
 
@@ -107,25 +104,21 @@
 
       if (tipo === "finita") {
         if (isNaN(N) || N <= 0) {
-          resultado.innerHTML = "<span style='color:red;'>⚠️ Debe ingresar N para calcular población finita.</span>";
+          resultado.innerHTML = "<strong>⚠️ Ingrese N correctamente</strong>";
           return;
         }
         const n = n0 / (1 + ((n0 - 1) / N));
-        resultado.innerHTML = `
-          <strong>📌 Cálculo aplicado:</strong><br>
-          <code>n = ${n0.toFixed(2)} / (1 + ((${n0.toFixed(2)} - 1)/${N}))</code><br>
-          <strong>✅ Resultado:</strong> <span style="color:green; font-size:1.2em;"><b>${Math.ceil(n)}</b> personas</span>
-        `;
+        resultado.innerHTML = `\\(n = \\frac{${n0.toFixed(2)}}{1 + \\frac{${n0.toFixed(2)} - 1}{${N}}}\\)<br><strong>✅ Tamaño mínimo:</strong> ${Math.ceil(n)} personas`;
       } else {
-        resultado.innerHTML = `
-          <strong>📌 Cálculo aplicado:</strong><br>
-          <code>n₀ = (${Z}² × ${p} × ${q.toFixed(2)}) / ${E}² = ${n0.toFixed(2)}</code><br>
-          <strong>✅ Resultado:</strong> <span style="color:green; font-size:1.2em;"><b>${Math.ceil(n0)}</b> personas</span>
-        `;
+        resultado.innerHTML = `\\(n_0 = \\frac{${Z}^2 \\cdot ${p} \\cdot ${q.toFixed(2)}}{${E}^2} = ${n0.toFixed(2)}\\)<br><strong>✅ Tamaño mínimo:</strong> ${Math.ceil(n0)} personas`;
       }
+
+      MathJax.typesetPromise();
     }
 
     mostrarFormula(); // inicializa la fórmula visible
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
